@@ -12,9 +12,5 @@ Besides the weather search, projects features loader
 and simple string error catcher to make better user
 experience.
 
-Login made via Formik + yup.
-
-## In Progress
-1. Authentication with the firebase
-2. History of searches
-3. Favourite cities to search
+Authentication and logout is made through Firebase,
+forms are made with Formik and yup.

@@ -1,9 +1,16 @@
-import React from "react";
+import React, {useState} from "react";
 import {Field, ErrorMessage, Formik} from "formik";
 import {validationSchemeReg} from "../../utils/validation";
-import {Link} from "react-router-dom";
+import {Link, useNavigate} from "react-router-dom";
+import {useAuth} from "../../hooks/useAuth";
+import axios from "axios";
 
 export default function RegisterForm() {
+    const [isLoading, setLoading] = useState(false)
+    const [errors, setErrors] = useState("")
+
+    const navigate = useNavigate()
+    const { signUp } = useAuth()
 
     interface FormRegValues {
         username: string,
@@ -22,18 +29,24 @@ export default function RegisterForm() {
                 initialValues={initialValues}
                 validationSchema={validationSchemeReg}
                 validateOnBlur
-                onSubmit={values => console.log(values)}
+                onSubmit={async (values) => {
+                    try {
+                        setErrors("")
+                        setLoading(true)
+                        console.log(values)
+                        await signUp(values.email, values.password)
+                        await axios.put('')
+                        navigate("/user", {replace: true})
+                    } catch (e) {
+                        setErrors("An error occurred")
+                        setLoading(false)
+                    }
+                    setLoading(false)
+                }}
             >
                 {(
                     {
-                        values,
-                        errors,
-                        touched,
-                        handleChange,
-                        handleBlur,
-                        isValid,
                         handleSubmit,
-                        dirty
                     }
                 ) => (
                     <form onSubmit={handleSubmit} className={"text-black p-4 md:p-8"}>
@@ -67,6 +80,7 @@ export default function RegisterForm() {
                             type="submit">
                             Sign Up
                         </button>
+                        {errors && <p className={"text-red-700 text-center mt-2"}>{errors}</p>}
                         <div className={"text-center text-white mt-4"}>
                             Already have an account? <Link className={"text-orange-500"} to={"/login"} >Log In</Link> Instead
                         </div>

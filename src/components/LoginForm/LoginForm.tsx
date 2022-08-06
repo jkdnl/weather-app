@@ -1,9 +1,15 @@
-import React from "react";
+import React, {useState} from "react";
 import {Field, ErrorMessage, Formik} from "formik";
 import {validationSchemeLog} from "../../utils/validation";
-import {Link} from "react-router-dom";
+import {Link, useNavigate} from "react-router-dom";
+import {useAuth} from "../../hooks/useAuth";
 
 export default function LoginForm() {
+    const [isLoading, setLoading] = useState(false)
+    const [errors, setErrors] = useState("")
+
+    const navigate = useNavigate()
+    const { signIn } = useAuth()
 
     interface FormLogValues {
         email: string,
@@ -20,18 +26,23 @@ export default function LoginForm() {
                 initialValues={initialValues}
                 validationSchema={validationSchemeLog}
                 validateOnBlur
-                onSubmit={values => console.log(values)}
+                onSubmit={async (values) => {
+                    try {
+                        setErrors("")
+                        setLoading(true)
+                        console.log(values)
+                        await signIn(values.email, values.password)
+                        navigate("/user", {replace: true})
+                    } catch (e) {
+                        setErrors("An error occurred")
+                        setLoading(false)
+                    }
+                    setLoading(false)
+                }}
             >
                 {(
                     {
-                        values,
-                        errors,
-                        touched,
-                        handleChange,
-                        handleBlur,
-                        isValid,
-                        handleSubmit,
-                        dirty
+                        handleSubmit
                     }
                 ) => (
                     <form onSubmit={handleSubmit} className={"text-black p-4 md:p-8"}>
@@ -54,9 +65,12 @@ export default function LoginForm() {
                         <ErrorMessage className={"text-red-700"} name="password" component="div" />
                         <button
                             className="w-full p-2 rounded-md mt-4 border-2 border-white text-white hover:bg-orange-500"
-                            type="submit">
+                            type="submit"
+                            disabled={isLoading}
+                        >
                             Log In
                         </button>
+                        {errors && <p className={"text-red-700 text-center mt-2"}>{errors}</p>}
                         <div className={"text-center text-white mt-4"}>
                             Do not have an account yet? <Link className={"text-orange-500"} to={"/register"} >Sign Up</Link> Instead
                         </div>
